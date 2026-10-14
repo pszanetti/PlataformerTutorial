@@ -2,7 +2,11 @@ name: "main"
 scale_along_z: 0
 embedded_instances {
   id: "hero"
-  data: "embedded_components {\n"
+  data: "components {\n"
+  "  id: \"hero\"\n"
+  "  component: \"/main/hero.script\"\n"
+  "}\n"
+  "embedded_components {\n"
   "  id: \"sprite\"\n"
   "  type: \"sprite\"\n"
   "  data: \"default_animation: \\\"idle\\\"\\n"
@@ -15,6 +19,7 @@ embedded_instances {
   "}\n"
   ""
   position {
+    x: 290.0
     y: 260.0
     z: 1.0
   }
