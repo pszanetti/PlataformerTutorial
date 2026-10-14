@@ -1,41 +1,55 @@
+-- Definindo CONSTANTES para o script inteiro
+local DIRECTION_RIGHT = 1
+local DIRECTION_LEFT = -1
+
 function init(self)
 
 	msg.post("#", "acquire_input_focus") -- Diz que este escript vai adquirir o foco de entrada (input)
 end
 
-
-
-function fixed_update(self, dt)
-	-- This function is called if 'Fixed Update Frequency' is enabled in the Engine section of game.project
-	-- Can be coupled with fixed updates of the physics simulation if 'Use Fixed Timestep' is enabled in
-	-- Physics section of game.project
-	-- Add update code here
-	-- Learn more: https://defold.com/manuals/script/
-	-- Remove this function if not needed
-end
-
-
-function on_input(self, action_id, action)
+-- função para definir a direção
+function walk(direction)
 	-- Adquirindo a posição atual do objeto de jogo
 	local position = go.get_position()
-	--pprint(action)
+	position.x = position.x + 5 * direction
+	-- Atualiza a posição do objeto de jogo
+	go.set_position(position)
+end
 
+-- Função para definir a animação
+function animate(action)
 	if action.pressed then
 		-- Alterar o lado do Sprite
 		sprite.play_flipbook("#sprite", "run")
-
+		flip(DIRECTION_RIGHT)
 	elseif action.released then
 		sprite.play_flipbook("#sprite", "idle")
+		flip(DIRECTION_LEFT)
+	end
+end
 
-	end
+-- Definindo o lado que o personagem vai
+function flip(direction)
+
 	
-	if action_id == hash("right") then 
-		position.x = position.x + 5
-		sprite.set_hflip("#sprite", false)
-	elseif action_id == hash("left") then
-		position.x = position.x - 5
-		sprite.set_hflip("#sprite", true)
-	end
-	-- Atualiza a posição do objeto de jogo
-	go.set_position(position)	
+	sprite.set_hflip("#sprite", direction < 0)
+	
+end
+
+function on_input(self, action_id, action)
+	--pprint(action)
+	-- Enviando para a função animate a ação de animação
+	animate(action)
+	-- Aqui eliminamos os ifs comentados
+	local direction = (action_id == hash("right")) and DIRECTION_RIGHT or DIRECTION_LEFT
+	walk(direction)
+	flip(direction)
+--	if action_id == hash("right") then 
+--		walk(DIRECTION_RIGHT)
+--		flip(DIRECTION_RIGHT)
+--	elseif action_id == hash("left") then
+--		walk(DIRECTION_LEFT)
+--		flip(DIRECTION_LEFT)
+--	end
+		
 end
