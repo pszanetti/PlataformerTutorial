@@ -2,18 +2,21 @@
 local DIRECTION_RIGHT = 1
 local DIRECTION_LEFT = -1
 
-function init(self)
+local BASE_VELOCITY = 500
+local GRAVITY = 1000
 
+function init(self)
 	msg.post("#", "acquire_input_focus") -- Diz que este escript vai adquirir o foco de entrada (input)
+	-- Inicializa a variável velocity
+	self.velocity = vmath.vector3(0, 0, 0)
+	-- variável para detectar a colisão
+	self.ground_contact = false
 end
 
 -- função para definir a direção
-function walk(direction)
-	-- Adquirindo a posição atual do objeto de jogo
-	local position = go.get_position()
-	position.x = position.x + 5 * direction
+function walk(self)
+	self.velocity.x = BASE_VELOCITY * self.direction
 	-- Atualiza a posição do objeto de jogo
-	go.set_position(position)
 end
 
 -- Função para definir a animação
@@ -30,10 +33,41 @@ end
 
 -- Definindo o lado que o personagem vai
 function flip(direction)
-
-	
 	sprite.set_hflip("#sprite", direction < 0)
+end
+
+local function clamp(v, min, max)
+	if v < min then	return min
+	elseif v > max then return max
+	else return v end
+end
+
+
+-- Função que recebe mensagens em caso de colisões por exemplo
+function on_message(self, message_id, message, sender)
+	-- pprint(message_id, message)
+	if message_id == hash("contact_point_response")
+	and message.other_group == hash("level") then
+			self.ground_contact = true
+			self.velocity.y = 0
+		end
+end
+
+function fixed_update(self, dt)
+	-- Gravidade
+	self.velocity.y = self.velocity.y - GRAVITY * dt
+	self.velocity.y = clamp(self.velocity.y, -2000, 2000)
+
+	if self.ground_contact then
+		self.velocity.y = 0
+	end
 	
+	-- Adquirindo a posição atual do objeto de jogo
+	local position = go.get_position()
+	position = position + self.velocity * dt
+	go.set_position(position)
+
+	self.velocity.x = 0
 end
 
 function on_input(self, action_id, action)
@@ -41,15 +75,8 @@ function on_input(self, action_id, action)
 	-- Enviando para a função animate a ação de animação
 	animate(action)
 	-- Aqui eliminamos os ifs comentados
-	local direction = (action_id == hash("right")) and DIRECTION_RIGHT or DIRECTION_LEFT
-	walk(direction)
-	flip(direction)
---	if action_id == hash("right") then 
---		walk(DIRECTION_RIGHT)
---		flip(DIRECTION_RIGHT)
---	elseif action_id == hash("left") then
---		walk(DIRECTION_LEFT)
---		flip(DIRECTION_LEFT)
---	end
+	self.direction = (action_id == hash("right")) and DIRECTION_RIGHT or DIRECTION_LEFT
+	walk(self)
+	flip(self.direction)
 		
 end
