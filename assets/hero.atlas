@@ -7,6 +7,9 @@ images {
 images {
   image: "/assets/images/Pink/alienPink_walk2.png"
 }
+images {
+  image: "/assets/images/Pink/alienPink_jump.png"
+}
 animations {
   id: "idle"
   images {
@@ -25,5 +28,13 @@ animations {
   }
   playback: PLAYBACK_LOOP_FORWARD
   fps: 12
+}
+animations {
+  id: "jump"
+  images {
+    image: "/assets/images/Pink/alienPink_jump.png"
+  }
+  playback: PLAYBACK_NONE
+  fps: 0
 }
 extrude_borders: 2
