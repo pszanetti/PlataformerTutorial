@@ -54,18 +54,31 @@ local function clamp(v, min, max)
 	else return v end
 end
 
-function handle_level_collisions(self, normal, distance)
-	-- Ajustando a penetração das colisões
-	distance = distance * vmath.length(normal)
 
+function handle_level_collisions(self, normal, distance)
+--[[Esta função resolve um problema clássico da física de jogos: quando o personagem "entra" um pouco dentro 
+da parede ou do chão, precisamos empurrá-lo para fora instantaneamente e zerar a velocidade na direção certa.
+]]-- Ajustando a penetração das colisões
+	
+	distance = distance * vmath.length(normal)
+--[[ Ajusta a profundidade real que o personagem invadiu
+ o obstáculo multiplicando pelo comprimento do vetor normal.]]--
+	
 	if distance > 0 then
+		
 		-- Usamos vmath.dot para obter a projeção escalar corretamente
 		local projection = vmath.dot(self.correction, normal)
+--[[Se o personagem estiver espremido em um canto (batendo na parede e no chão ao mesmo tempo), 
+a função calcula quanto ajuste já foi feito (self.correction) para evitar 
+que o motor empurre o personagem duas vezes na mesma direção e cause um "tremelique".]]--
+		
 		local compensation_distance = distance - projection
-
+		-- Calcula o quanto ainda falta empurrar o personagem para fora da colisão.
+		
 		if compensation_distance > 0 then
 			local compensation = normal * compensation_distance
 			go.set_position(go.get_position() + compensation)
+			-- Pega a posição atual do objeto e teleporta ele instantaneamente para fora do obstáculo.
 			self.correction = self.correction + compensation
 		end
 	end
@@ -87,7 +100,21 @@ function handle_level_collisions(self, normal, distance)
 	end
 end
 
+--[[
+No Defold, objetos conversam entre si e com o motor através de mensagens. 
+Quando o motor de física detecta que dois colisores se sobrepuseram, 
+ele envia uma mensagem para a caixa de correio do script.
+]]--
 function on_message(self, message_id, message, sender)
+	--[[
+ É uma função padrão do Defold. Sempre que o objeto recebe qualquer mensagem, 
+essa função é acionada automaticamente.self: Referência ao estado atual do 
+script.message_id: O "título" ou ID da mensagem (ex: se foi uma colisão, um som terminou, etc.). 
+O Defold usa hash() para otimizar strings.message: Uma tabela contendo os dados do evento 
+(como ponto de contato, normal, distância).sender: Quem enviou a mensagem.
+if message_id == hash("contact_point_response"): O motor de física dispara essa mensagem específica 
+(contact point response) a cada frame em que há uma sobreposição de colisores. Se o player estiver encostado no chão, o motor dispara isso repetidamente.and message.other_group == hash("level"): Filtra para garantir que só vamos processar colisões se o outro objeto pertencer ao grupo físico chamado "level" (o nosso TileMap do cenário), ignorando outros objetos (como moedas ou inimigos, se houver).   handle_level_collisions(...): Se passou no filtro, chama nossa função personalizada passando o vetor normal e a distance da colisão.   
+]]--
 	if message_id == hash("contact_point_response") and message.other_group == hash("level") then
 		handle_level_collisions(self, message.normal, message.distance)
 	end
