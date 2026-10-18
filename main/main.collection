@@ -105,3 +105,11 @@ embedded_instances {
     z: 867.0
   }
 }
+embedded_instances {
+  id: "gui"
+  data: "components {\n"
+  "  id: \"main\"\n"
+  "  component: \"/main/main.gui\"\n"
+  "}\n"
+  ""
+}
