@@ -10,6 +10,9 @@ images {
 images {
   image: "/assets/images/Pink/alienPink_jump.png"
 }
+images {
+  image: "/assets/images/blue_grass.png"
+}
 animations {
   id: "idle"
   images {

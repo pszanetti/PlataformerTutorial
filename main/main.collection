@@ -1,4 +1,15 @@
 name: "main"
+collection_instances {
+  id: "paralax"
+  collection: "/main/paralax.collection"
+  position {
+    x: 266.0
+    y: 399.0
+  }
+  scale3 {
+    z: -1.0
+  }
+}
 scale_along_z: 0
 embedded_instances {
   id: "hero"
